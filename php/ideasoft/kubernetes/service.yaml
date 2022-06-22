@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ideasoft-php
+  name: ideasoft-php
+  namespace: ideasoft
+spec:
+  ports:
+  - name: ideasoft
+    port: 2000
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: ideasoft-php
+  type: ClusterIP

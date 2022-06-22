@@ -1,0 +1,33 @@
+kaniko-build:
+  allow_failure: false
+  image:     
+    name: gcr.io/kaniko-project/executor:v1.7.0-debug
+    entrypoint: [""]
+  stage: build
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - |
+      cat <<EOF > /kaniko/.docker/config.json
+        {
+          "auths":{
+            "${CI_REGISTRY}":{
+              "auth":"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')"
+            },
+            "https://index.docker.io/v1/":{
+              "auth":"$(printf "%s:%s" "${DOCKERHUB_USERNAME}" "${DOCKERHUB_PASSWORD}" | base64 | tr -d '\n')"
+            }
+          }
+        }
+      EOF
+    - cat /kaniko/.docker/config.json
+  script:
+    - >-
+      /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}:${CI_PIPELINE_IID}"
+      --destination "${CI_REGISTRY_IMAGE}:latest"
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      exists:
+        - Dockerfile

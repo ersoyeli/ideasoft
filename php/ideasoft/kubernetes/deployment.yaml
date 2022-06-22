@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ideasoft-php
+  labels:
+    app: ideasoft-php
+  namespace: ideasoft
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ideasoft-php
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 33%
+  template:
+    metadata:
+      labels:
+        app: ideasoft-php
+    spec:
+      containers:
+        - name: ideasoft-php
+          image: ${CI_REGISTRY_IMAGE}:${CI_PIPELINE_IID}
+          envFrom:
+          - configMapRef:
+              name: ideasoft-php
+      imagePullSecrets:
+        - name: gitlab-registry
